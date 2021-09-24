@@ -3,8 +3,10 @@ package Main.Logic.Characters;
 import Main.Control.Controllable;
 import Main.Control.Option;
 import Main.Control.UI;
+import Main.Engine.Actor;
 import Main.Engine.Drawing.Renderer;
 import Main.Engine.Drawing.Sprites.Sprite;
+import Main.Engine.Instance;
 import Main.Logic.Components.*;
 import Main.Logic.StatusEffects.Defending;
 import Main.Logic.StatusEffects.StatusEffect;
@@ -25,12 +27,14 @@ public class PlayerCharacter implements GameCharacter, Controllable {
     private double energy = 100D;
     private Sprite sprite;
     private CharacterState state;
+    private final Instance instance;
 
-    public PlayerCharacter(CharacterState state, List<AttackMethod> methods, UI controllingUI, Sprite sprite)
+    public PlayerCharacter(CharacterState state, List<AttackMethod> methods, UI controllingUI, Instance instance, Sprite sprite)
     {
         this.state = state;
         this.sprite = sprite;
         this.controllingUI = controllingUI;
+        this.instance = instance;
         attackingManager = new AttackingManager(methods);
         primaryOptions.add(new Option() {
 
@@ -154,6 +158,10 @@ public class PlayerCharacter implements GameCharacter, Controllable {
         for (StatusEffect effect : state.getActiveEffects())
         {
             effect.update(dt);
+        }
+        if (state.getHealth() == 0)
+        {
+            instance.remove(this);
         }
     }
 

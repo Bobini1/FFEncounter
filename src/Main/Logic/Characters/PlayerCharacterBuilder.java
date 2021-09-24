@@ -2,6 +2,7 @@ package Main.Logic.Characters;
 
 import Main.Control.UI;
 import Main.Engine.Drawing.Sprites.Sprite;
+import Main.Engine.Instance;
 import Main.Logic.Components.AttackMethod;
 import Main.Logic.Components.CharacterState;
 
@@ -12,6 +13,8 @@ public class PlayerCharacterBuilder {
     CharacterState state;
     List<AttackMethod> attackMethods;
     Sprite sprite;
+    Instance instance;
+    UI controllingUI;
 
     public CharacterState getState() {
         return state;
@@ -36,10 +39,10 @@ public class PlayerCharacterBuilder {
     public void setSprite(Sprite sprite) {
         this.sprite = sprite;
     }
-    UI controllingUI;
 
-    public PlayerCharacterBuilder(UI controllingUI) {
+    public PlayerCharacterBuilder(UI controllingUI, Instance instance) {
         this.controllingUI = controllingUI;
+        this.instance = instance;
     }
 
     public PlayerCharacter getResult()
@@ -52,6 +55,6 @@ public class PlayerCharacterBuilder {
         {
             copiedAttackMethods.add(method.clone());
         }
-        return new PlayerCharacter(state.clone(), copiedAttackMethods, controllingUI, sprite.clone());
+        return new PlayerCharacter(state.clone(), copiedAttackMethods, controllingUI, instance, sprite.clone());
     }
 }

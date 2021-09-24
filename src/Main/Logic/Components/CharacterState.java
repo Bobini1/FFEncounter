@@ -64,6 +64,10 @@ public class CharacterState implements Cloneable{
         {
             health = initialHealth;
         }
+        else if (health < 0)
+        {
+            health = 0;
+        }
     }
 
     @Override

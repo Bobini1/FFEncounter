@@ -19,10 +19,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.time.Duration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class Instance extends javafx.application.Application {
     List<Actor> activeActors = new ArrayList<>();
@@ -30,6 +27,7 @@ public class Instance extends javafx.application.Application {
     private GraphicsContext gc;
     private Background bg;
     private UI ui;
+    Queue<Actor> actorsToRemove = new LinkedList<>();
 
     @Override
     public void start(Stage stage){
@@ -51,10 +49,10 @@ public class Instance extends javafx.application.Application {
         ui = new UI(this, theScene);
 
 
-        PlayerCharacterBuilder builder = new PlayerCharacterBuilder(ui);
+        PlayerCharacterBuilder builder = new PlayerCharacterBuilder(ui, this);
         builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
                 new Position(100, 100), 10, 1.5));
-        builder.setAttackMethods(List.of(new AttackMethod(5, 1,
+        builder.setAttackMethods(List.of(new AttackMethod(25, 1,
                 new ArrayList<>(), 50, "Sword")));
         builder.setState(new CharacterState(100F, 2F, 1F));
 
@@ -79,10 +77,16 @@ public class Instance extends javafx.application.Application {
             {
                 Duration dt = Duration.ofNanos(currentNanoTime - previousFrame);
                 previousFrame = currentNanoTime;
-                for (Actor actor : activeActors)
+                Iterator<Actor> actorIterator = activeActors.iterator();
+                while (actorIterator.hasNext())
                 {
+                    Actor actor = actorIterator.next();
                     actor.update(dt);
                 }
+                activeActors.removeAll(actorsToRemove);
+
+                ui.update(dt);
+
                 Renderer renderer = new JFXRenderer(gc);
                 bg.accept(renderer);
                 for (Actor actor : activeActors)
@@ -105,6 +109,11 @@ public class Instance extends javafx.application.Application {
         return result;
     }
 
+    public boolean isNoActiveActors()
+    {
+        return activeActors.isEmpty();
+    }
+
     public void instantiate(Actor actor)
     {
         activeActors.add(actor);
@@ -112,7 +121,7 @@ public class Instance extends javafx.application.Application {
 
     public void remove(Actor actor)
     {
-        activeActors.remove(actor);
+        actorsToRemove.add(actor);
     }
 
     public static void main(String[] args)

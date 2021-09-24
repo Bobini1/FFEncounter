@@ -36,7 +36,8 @@ public class Defending implements StatusEffect {
 
     @Override
     public ActionCommand processIncomingAction(ActionCommand action) {
-        return new ActionCommand(action.getDamage() * 0.8F, action.getTrueDamage(), action.getEffects());
+        return new ActionCommand(action.getDamage() > 0 ? action.getDamage() * 0.8F : action.getDamage(),
+                action.getTrueDamage(), action.getEffects());
     }
 
     @Override

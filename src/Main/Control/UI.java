@@ -4,16 +4,25 @@ import Main.Engine.Actor;
 import Main.Engine.Drawing.Drawable;
 import Main.Engine.Instance;
 import Main.Engine.Drawing.Renderer;
+import Main.Engine.TimeDependent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class UI implements Drawable {
+public class UI implements Drawable, TimeDependent {
     List<Option> options;
     Instance instance;
     UIState state;
+    Runnable stateChange = () -> {};
+
+    @Override
+    public void update(Duration dt) {
+        stateChange.run();
+        stateChange = () -> {};
+    }
 
     public static class NoChoicesException extends Exception {
         public NoChoicesException(String errorMessage) {
@@ -172,26 +181,31 @@ public class UI implements Drawable {
 
     public void setSelectActorState(Class<?> type, Consumer<Actor> listener)
     {
-        try {
-            state = new SelectActor(type, listener, state);
-        } catch (NoChoicesException e) {
-            state = new EmptyUI();
-        }
+        stateChange = () ->
+        {
+            try {
+                state = new SelectActor(type, listener, state);
+            } catch (NoChoicesException e) {
+                state = new EmptyUI();
+            }
+        };
     }
 
     public void setDefaultState()
     {
-        try
+        stateChange = () ->
         {
-            state = new SelectActor();
-        } catch (NoChoicesException e) {
-            state = new EmptyUI();
-        }
+            try {
+                state = new SelectActor();
+            } catch (NoChoicesException e) {
+                state = new EmptyUI();
+            }
+        };
     }
 
     public void setSelectOptionState(List<Option> options)
     {
-        state = new SelectOption(options, state);
+        stateChange = () -> state = new SelectOption(options, state);
     }
 
     @Override
