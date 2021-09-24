@@ -4,12 +4,12 @@ import Main.Logic.StatusEffects.StatusEffect;
 
 import java.util.List;
 
-public class AttackMethod {
-    private final double energy;
-    final float damage;
-    final float trueDamage;
-    final String name;
-    final List<StatusEffect> effects;
+public class AttackMethod implements Cloneable {
+    private double energy;
+    float damage;
+    float trueDamage;
+    String name;
+    List<StatusEffect> effects;
 
     public AttackMethod(float damage, float trueDamage, List<StatusEffect> effects, double energy, String name)
     {
@@ -43,5 +43,20 @@ public class AttackMethod {
     public double getEnergy()
     {
         return energy;
+    }
+
+    @Override
+    public AttackMethod clone() {
+        try {
+            AttackMethod clone = (AttackMethod) super.clone();
+            clone.damage = damage;
+            clone.trueDamage = trueDamage;
+            clone.effects = effects;
+            clone.name = name;
+            clone.energy = energy;
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

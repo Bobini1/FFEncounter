@@ -4,9 +4,12 @@ import Main.Control.Controllable;
 import Main.Control.Option;
 import Main.Control.UI;
 import Main.Engine.Drawing.Renderer;
+import Main.Engine.Drawing.Sprites.Sprite;
 import Main.Logic.Components.*;
 import Main.Logic.StatusEffects.Defending;
 import Main.Logic.StatusEffects.StatusEffect;
+import javafx.scene.image.Image;
+
 import java.time.Duration;
 
 import java.util.ArrayList;
@@ -17,13 +20,16 @@ import java.util.Set;
 public class PlayerCharacter implements GameCharacter, Controllable {
 
     private final UI controllingUI;
-    private final List<Option> primaryOptions = new ArrayList<Option>();
+    private final List<Option> primaryOptions = new ArrayList<>();
     private final AttackingManager attackingManager;
-    private final Set<StatusEffect> activeEffects = new HashSet<StatusEffect>();
     private double energy = 100D;
+    private Sprite sprite;
+    private CharacterState state;
 
-    public PlayerCharacter(CharacterState state, List<AttackMethod> methods, UI controllingUI, Position)
+    public PlayerCharacter(CharacterState state, List<AttackMethod> methods, UI controllingUI, Sprite sprite)
     {
+        this.state = state;
+        this.sprite = sprite;
         this.controllingUI = controllingUI;
         attackingManager = new AttackingManager(methods);
         primaryOptions.add(new Option() {
@@ -47,7 +53,7 @@ public class PlayerCharacter implements GameCharacter, Controllable {
 
             @Override
             public void execute() {
-                activeEffects.add(new Defending(Duration.ofSeconds(20), activeEffects));
+                state.addStatusEffect(new Defending(Duration.ofSeconds(20), state.getActiveEffects()));
                 controllingUI.setDefaultState();
             }
 
@@ -61,6 +67,12 @@ public class PlayerCharacter implements GameCharacter, Controllable {
                 return "Defend";
             }
         });
+    }
+
+    @Override
+    public Sprite getSprite()
+    {
+        return sprite;
     }
 
     public List<Option> getPrimaryOptions()
@@ -80,7 +92,7 @@ public class PlayerCharacter implements GameCharacter, Controllable {
 
     private class AttackingManager
     {
-        List<Option> attackMethodOptions = new ArrayList<Option>();
+        List<Option> attackMethodOptions = new ArrayList<>();
         AttackMethod selectedAttackMethod;
         public AttackingManager(List<AttackMethod> methods)
         {
@@ -129,7 +141,7 @@ public class PlayerCharacter implements GameCharacter, Controllable {
     @Override
     public void update(Duration dt) {
         energy = Double.min(100D, energy + dt.getNano() * 1E-10);
-        for (StatusEffect effect : activeEffects)
+        for (StatusEffect effect : state.getActiveEffects())
         {
             effect.update(dt);
         }
@@ -137,11 +149,11 @@ public class PlayerCharacter implements GameCharacter, Controllable {
 
     @Override
     public CharacterState getCharacterState() {
-        return null;
+        return state;
     }
 
     @Override
-    public List<StatusEffect> getStatusEffects() {
-        return null;
+    public Set<StatusEffect> getStatusEffects() {
+        return state.getActiveEffects();
     }
 }

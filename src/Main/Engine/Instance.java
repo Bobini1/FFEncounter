@@ -3,7 +3,13 @@ package Main.Engine;
 import Main.Control.UI;
 import Main.Engine.Drawing.JFXRenderer;
 import Main.Engine.Drawing.Renderer;
-import Main.Logic.PlayerActors.Actor;
+import Main.Engine.Drawing.Sprites.SimpleSprite;
+import Main.Engine.Drawing.Sprites.Sprite;
+import Main.Logic.Characters.PlayerCharacterBuilder;
+import Main.Logic.Components.AttackMethod;
+import Main.Logic.Components.CharacterState;
+import Main.Logic.Components.Position;
+import Main.Logic.StatusEffects.StatusEffect;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -14,18 +20,19 @@ import javafx.stage.Stage;
 import java.time.Duration;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 public class Instance extends javafx.application.Application {
-    List<Actor> activeActors;
+    List<Actor> activeActors = new ArrayList<>();
 
-    private Stage stage;
     private GraphicsContext gc;
     private Background bg;
+    private UI ui;
 
     @Override
     public void start(Stage stage){
-        this.stage = stage;
         stage.setTitle("FFEncounter");
         stage.setResizable(false);
 
@@ -41,7 +48,24 @@ public class Instance extends javafx.application.Application {
         stage.show();
 
         bg = new Background(new Image(String.valueOf(getClass().getResource("/BG.png"))));
-        UI ui = new UI(this, canvas);
+        ui = new UI(this, theScene);
+
+
+        PlayerCharacterBuilder builder = new PlayerCharacterBuilder(ui);
+        builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
+                new Position(100, 100), 10, 2));
+        builder.setAttackMethods(List.of(new AttackMethod(5, 1,
+                new ArrayList<>(), 50, "Sword")));
+        builder.setState(new CharacterState(100F, 2F, 1F));
+
+        instantiate(builder.getResult());
+
+        builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
+                new Position(200, 100), 10, 2));
+        instantiate(builder.getResult());
+
+        ui.setDefaultState();
+
         loop();
     }
 
@@ -65,6 +89,7 @@ public class Instance extends javafx.application.Application {
                 {
                     actor.accept(renderer);
                 }
+                ui.accept(renderer);
                 renderer.renderAll();
             }
         }.start();
@@ -72,7 +97,7 @@ public class Instance extends javafx.application.Application {
 
     public List<Actor> getActorsOfType(Class<?> type)
     {
-        List<Actor> result = new ArrayList<Actor>();
+        List<Actor> result = new ArrayList<>();
         for (Actor actor : activeActors)
         {
             if (type.isInstance(actor)) result.add(actor);
@@ -88,16 +113,6 @@ public class Instance extends javafx.application.Application {
     public void remove(Actor actor)
     {
         activeActors.remove(actor);
-    }
-
-    public Stage getStage()
-    {
-        return stage;
-    }
-
-    public GraphicsContext getGC()
-    {
-        return gc;
     }
 
     public static void main(String[] args)

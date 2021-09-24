@@ -14,6 +14,7 @@ public class Defending implements StatusEffect {
     {
         this.activeEffects = activeEffects;
         this.duration = duration;
+        this.accumulator = Duration.ZERO;
     }
 
     @Override
@@ -29,12 +30,17 @@ public class Defending implements StatusEffect {
     }
 
     @Override
+    public StatusEffect clone() {
+        return new Defending(duration, activeEffects);
+    }
+
+    @Override
     public ActionCommand processIncomingAction(ActionCommand action) {
-        return null;
+        return new ActionCommand(action.getDamage() * 0.8F, action.getTrueDamage(), action.getEffects());
     }
 
     @Override
     public ActionCommand processOutgoingAction(ActionCommand action) {
-        return null;
+        return action;
     }
 }

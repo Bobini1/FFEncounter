@@ -2,19 +2,25 @@ package Main.Logic.Actions;
 import Main.Logic.Components.CharacterState;
 import Main.Logic.StatusEffects.StatusEffect;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ActionCommand
 {
     float damage;
     float trueDamage;
-    List<StatusEffect> effects;
+    Set<StatusEffect> effects;
 
-    public ActionCommand(float damage, float trueDamage, List<StatusEffect> effects)
+    public ActionCommand(float damage, float trueDamage, Set<StatusEffect> effects)
     {
         this.damage = damage;
         this.trueDamage = trueDamage;
-        this.effects = effects;
+        this.effects = new HashSet<>();
+        for (StatusEffect effect : effects)
+        {
+            this.effects.add(effect.clone());
+        }
     }
 
     public CharacterState state(CharacterState state)
@@ -31,7 +37,7 @@ public class ActionCommand
         return trueDamage;
     }
 
-    public List<StatusEffect> getEffects()
+    public Set<StatusEffect> getEffects()
     {
         return effects;
     }
