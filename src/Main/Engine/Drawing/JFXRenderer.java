@@ -2,12 +2,14 @@ package Main.Engine.Drawing;
 
 import Main.Control.Option;
 import Main.Control.UI;
+import Main.Engine.Actor;
 import Main.Engine.Background;
 import Main.Engine.Drawing.Sprites.Sprite;
 import Main.Logic.Characters.GameCharacter;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
@@ -68,8 +70,11 @@ public class JFXRenderer implements Renderer{
                 if (!options.get(i).isActive()) context.setFill(Color.GRAY);
                 else if (options.get(i) == selectOption.getHighlightedOption()) context.setFill(Color.RED);
                 else context.setFill(Color.GREEN);
+                context.setFont(new Font(30));
+                double fontSize = context.getFont().getSize();
+                double interspace = context.getFont().getSize() / 10;
                 context.fillText(options.get(i).getName(), canvasWidth / 2,
-                        canvasHeight - boxHeight + boxHeight * ((float) i / options.size()));
+                        canvasHeight - boxHeight / 2 + (interspace + fontSize) * (i - (float)options.size() / 2));
             }
         };
     }
@@ -77,8 +82,9 @@ public class JFXRenderer implements Renderer{
     @Override
     public void draw(UI.SelectActor selectActor) {
         drawUI = () -> {
-            double positionX = selectActor.getHighlightedActor().getPositionX();
-            double positionY = selectActor.getHighlightedActor().getPositionY();
+            Actor highlightedActor = selectActor.getHighlightedActor();
+            double positionX = highlightedActor.getPositionX() + highlightedActor.getWidth() / 2;
+            double positionY = highlightedActor.getPositionY();
             context.setTextAlign(TextAlignment.CENTER);
             context.setTextBaseline(VPos.CENTER);
             context.setFill(Color.RED);

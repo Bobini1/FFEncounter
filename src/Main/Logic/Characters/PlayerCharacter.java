@@ -82,12 +82,22 @@ public class PlayerCharacter implements GameCharacter, Controllable {
 
     @Override
     public double getPositionX() {
-        return 0;
+        return sprite.getPosition().getX();
     }
 
     @Override
     public double getPositionY() {
-        return 0;
+        return sprite.getPosition().getY();
+    }
+
+    @Override
+    public double getWidth() {
+        return sprite.getWidth();
+    }
+
+    @Override
+    public double getHeight() {
+        return sprite.getWidth();
     }
 
     private class AttackingManager
@@ -103,9 +113,9 @@ public class PlayerCharacter implements GameCharacter, Controllable {
                     @Override
                     public void execute() {
                         selectedAttackMethod = method;
-                        controllingUI.setSelectActorState(AttackTaker.class, actor -> {
-                            setTargetAndLaunch((AttackTaker)actor);
-                        });
+                        controllingUI.setSelectActorState(AttackTaker.class, actor ->
+                            setTargetAndLaunch((AttackTaker)actor)
+                        );
                     }
 
                     @Override

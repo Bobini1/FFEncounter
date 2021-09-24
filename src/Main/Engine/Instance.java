@@ -53,7 +53,7 @@ public class Instance extends javafx.application.Application {
 
         PlayerCharacterBuilder builder = new PlayerCharacterBuilder(ui);
         builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
-                new Position(100, 100), 10, 2));
+                new Position(100, 100), 10, 1.5));
         builder.setAttackMethods(List.of(new AttackMethod(5, 1,
                 new ArrayList<>(), 50, "Sword")));
         builder.setState(new CharacterState(100F, 2F, 1F));
@@ -61,7 +61,7 @@ public class Instance extends javafx.application.Application {
         instantiate(builder.getResult());
 
         builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
-                new Position(200, 100), 10, 2));
+                new Position(200, 100), 10, 1.5));
         instantiate(builder.getResult());
 
         ui.setDefaultState();

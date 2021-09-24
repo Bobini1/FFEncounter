@@ -87,7 +87,7 @@ public class UI implements Drawable {
 
         public double getHeight()
         {
-            return 100D;
+            return 200D;
         }
 
         public List<Option> getOptions()
@@ -113,7 +113,6 @@ public class UI implements Drawable {
         @Override
         public void cycleChoices(int howMuch) {
             highlightedOptionIndex = (highlightedOptionIndex + 1) % options.size();
-            System.out.println(highlightedOptionIndex);
         }
 
         @Override
@@ -141,7 +140,7 @@ public class UI implements Drawable {
         {
             actors = instance.getActorsOfType(Controllable.class);
             if (actors.isEmpty()) throw new NoChoicesException("No actors to select from");
-            this.listener = actor -> state = new SelectOption(((Controllable)actor).getPrimaryOptions(), this);;
+            this.listener = actor -> state = new SelectOption(((Controllable)actor).getPrimaryOptions(), this);
             this.previousState = null;
         }
 
