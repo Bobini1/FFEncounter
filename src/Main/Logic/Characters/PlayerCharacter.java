@@ -1,36 +1,36 @@
 package Main.Logic.Characters;
 
-import Main.Control.Controllable;
 import Main.Control.Option;
 import Main.Control.UI;
 import Main.Engine.Actor;
 import Main.Engine.Drawing.Renderer;
+import Main.Engine.Drawing.Sprites.AnimatedSprite;
 import Main.Engine.Drawing.Sprites.Sprite;
 import Main.Engine.Instance;
 import Main.Logic.Components.*;
 import Main.Logic.StatusEffects.Defending;
 import Main.Logic.StatusEffects.StatusEffect;
-import javafx.scene.image.Image;
 
 import java.time.Duration;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class PlayerCharacter implements GameCharacter, Controllable {
+public class PlayerCharacter implements ControllableGameCharacter {
 
     private final UI controllingUI;
     private final List<Option> primaryOptions = new ArrayList<>();
     private final AttackingManager attackingManager;
     private double energy = 100D;
-    private Sprite sprite;
-    private CharacterState state;
+    private final AnimatedSprite sprite;
+    private final CharacterState state;
     private final Instance instance;
+    private static final double maxEnergy = 100D;
+    private boolean dead = false;
 
-    public PlayerCharacter(CharacterState state, List<AttackMethod> methods, UI controllingUI, Instance instance, Sprite sprite)
-    {
+    public PlayerCharacter(CharacterState state, List<AttackMethod> methods, UI controllingUI, Instance instance, AnimatedSprite sprite) {
         this.state = state;
         this.sprite = sprite;
         this.controllingUI = controllingUI;
@@ -58,12 +58,13 @@ public class PlayerCharacter implements GameCharacter, Controllable {
             @Override
             public void execute() {
                 state.addStatusEffect(new Defending(Duration.ofSeconds(20), state.getActiveEffects()));
+                energy -= 40;
                 controllingUI.setDefaultState();
             }
 
             @Override
             public Boolean isActive() {
-                return true;
+                return energy > 40D;
             }
 
             @Override
@@ -74,13 +75,21 @@ public class PlayerCharacter implements GameCharacter, Controllable {
     }
 
     @Override
-    public Sprite getSprite()
-    {
+    public Sprite getSprite() {
         return sprite;
     }
 
-    public List<Option> getPrimaryOptions()
-    {
+    @Override
+    public double getEnergy() {
+        return energy;
+    }
+
+    @Override
+    public double getMaxEnergy() {
+        return maxEnergy;
+    }
+
+    public List<Option> getPrimaryOptions() {
         return primaryOptions;
     }
 
@@ -104,21 +113,19 @@ public class PlayerCharacter implements GameCharacter, Controllable {
         return sprite.getWidth();
     }
 
-    private class AttackingManager
-    {
+    private class AttackingManager {
         List<Option> attackMethodOptions = new ArrayList<>();
         AttackMethod selectedAttackMethod;
-        public AttackingManager(List<AttackMethod> methods)
-        {
-            for (AttackMethod method : methods)
-            {
+
+        public AttackingManager(List<AttackMethod> methods) {
+            for (AttackMethod method : methods) {
                 attackMethodOptions.add(new Option() {
 
                     @Override
                     public void execute() {
                         selectedAttackMethod = method;
                         controllingUI.setSelectActorState(AttackTaker.class, actor ->
-                            setTargetAndLaunch((AttackTaker)actor)
+                                setTargetAndLaunch((AttackTaker) actor)
                         );
                     }
 
@@ -135,14 +142,14 @@ public class PlayerCharacter implements GameCharacter, Controllable {
             }
         }
 
-        public List<Option> getAttackMethodOptions()
-        {
+        public List<Option> getAttackMethodOptions() {
             return attackMethodOptions;
         }
 
-        public void setTargetAndLaunch(AttackTaker target)
-        {
+        public void setTargetAndLaunch(AttackTaker target) {
             attack(selectedAttackMethod, target);
+            energy -= selectedAttackMethod.getEnergy();
+            sprite.attack(target);
             controllingUI.setDefaultState();
         }
     }
@@ -154,15 +161,26 @@ public class PlayerCharacter implements GameCharacter, Controllable {
 
     @Override
     public void update(Duration dt) {
-        energy = Double.min(100D, energy + dt.getNano() * 1E-10);
-        for (StatusEffect effect : state.getActiveEffects())
-        {
+        energy = Double.min(maxEnergy, energy + dt.getNano() * 5E-9);
+
+        Iterator<StatusEffect> effectIterator = state.getActiveEffects().iterator();
+        while (effectIterator.hasNext()) {
+            effectIterator.next().update(dt);
+        }
+        for (StatusEffect effect : state.getActiveEffects()) {
             effect.update(dt);
         }
-        if (state.getHealth() == 0)
-        {
+        if (state.getHealth() == 0) {
             instance.remove(this);
+            dead = true;
         }
+        sprite.update(dt);
+    }
+
+    @Override
+    public boolean isRemoved()
+    {
+        return dead;
     }
 
     @Override

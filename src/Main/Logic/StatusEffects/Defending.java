@@ -1,6 +1,7 @@
 package Main.Logic.StatusEffects;
 
 import Main.Logic.Actions.ActionCommand;
+
 import java.time.Duration;
 
 import java.util.Set;
@@ -10,8 +11,7 @@ public class Defending implements StatusEffect {
     private final Duration duration;
     private Duration accumulator;
 
-    public Defending(Duration duration, Set<StatusEffect> activeEffects)
-    {
+    public Defending(Duration duration, Set<StatusEffect> activeEffects) {
         this.activeEffects = activeEffects;
         this.duration = duration;
         this.accumulator = Duration.ZERO;
@@ -24,9 +24,8 @@ public class Defending implements StatusEffect {
     }
 
     @Override
-    public double getProgress()
-    {
-        return (double)duration.minus(accumulator).toNanos() / duration.toNanos();
+    public double getProgress() {
+        return (double) duration.minus(accumulator).toNanos() / duration.toNanos();
     }
 
     @Override

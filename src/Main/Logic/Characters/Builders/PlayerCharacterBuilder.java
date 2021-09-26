@@ -1,42 +1,35 @@
-package Main.Logic.Characters;
+package Main.Logic.Characters.Builders;
 
 import Main.Control.UI;
+import Main.Engine.Drawing.Sprites.AnimatedSprite;
 import Main.Engine.Drawing.Sprites.Sprite;
 import Main.Engine.Instance;
+import Main.Logic.Characters.PlayerCharacter;
 import Main.Logic.Components.AttackMethod;
 import Main.Logic.Components.CharacterState;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayerCharacterBuilder {
+public class PlayerCharacterBuilder implements GameCharacterBuilder {
     CharacterState state;
     List<AttackMethod> attackMethods;
-    Sprite sprite;
+    AnimatedSprite sprite;
     Instance instance;
     UI controllingUI;
 
-    public CharacterState getState() {
-        return state;
-    }
-
-    public List<AttackMethod> getAttackMethods() {
-        return attackMethods;
-    }
-
-    public Sprite getSprite() {
-        return sprite;
-    }
-
+    @Override
     public void setState(CharacterState state) {
         this.state = state;
     }
 
+    @Override
     public void setAttackMethods(List<AttackMethod> attackMethods) {
         this.attackMethods = attackMethods;
     }
 
-    public void setSprite(Sprite sprite) {
+    @Override
+    public void setSprite(AnimatedSprite sprite) {
         this.sprite = sprite;
     }
 
@@ -45,16 +38,10 @@ public class PlayerCharacterBuilder {
         this.instance = instance;
     }
 
-    public PlayerCharacter getResult()
-    {
+    public PlayerCharacter getResult() {
         if (state == null || attackMethods == null || controllingUI == null || sprite == null)
             throw new RuntimeException("Character field uninitialized in builder");
 
-        List<AttackMethod> copiedAttackMethods = new ArrayList<>();
-        for (AttackMethod method : attackMethods)
-        {
-            copiedAttackMethods.add(method.clone());
-        }
-        return new PlayerCharacter(state.clone(), copiedAttackMethods, controllingUI, instance, sprite.clone());
+        return new PlayerCharacter(state, attackMethods, controllingUI, instance, sprite);
     }
 }

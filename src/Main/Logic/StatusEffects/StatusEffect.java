@@ -5,5 +5,6 @@ import Main.Engine.TimeDependent;
 
 public interface StatusEffect extends TimeDependent, ActionProcessor, Cloneable {
     double getProgress();
+
     StatusEffect clone();
 }

@@ -6,7 +6,7 @@ import Main.Logic.StatusEffects.StatusEffect;
 import java.util.HashSet;
 import java.util.Set;
 
-public class CharacterState implements Cloneable{
+public class CharacterState implements Cloneable {
     float initialHealth;
     float health;
     float defense;
@@ -14,8 +14,7 @@ public class CharacterState implements Cloneable{
 
     Set<StatusEffect> activeEffects;
 
-    public CharacterState(float health, float defense, float strength)
-    {
+    public CharacterState(float health, float defense, float strength) {
         this.health = health;
         this.initialHealth = health;
         this.defense = defense;
@@ -23,23 +22,19 @@ public class CharacterState implements Cloneable{
         this.activeEffects = new HashSet<>();
     }
 
-    public float getHealth()
-    {
+    public float getHealth() {
         return health;
     }
 
-    public float getInitialHealth()
-    {
+    public float getInitialHealth() {
         return initialHealth;
     }
 
-    public float getDefense()
-    {
+    public float getDefense() {
         return defense;
     }
 
-    public float getStrength()
-    {
+    public float getStrength() {
         return strength;
     }
 
@@ -47,25 +42,20 @@ public class CharacterState implements Cloneable{
         return activeEffects;
     }
 
-    public void addStatusEffect(StatusEffect effect)
-    {
+    public void addStatusEffect(StatusEffect effect) {
         activeEffects.add(effect);
     }
 
     public void giveAction(ActionCommand action) {
         float damage = action.getDamage();
-        if (action.getDamage() < 0)
-        {
+        if (action.getDamage() < 0) {
             damage = Float.max(action.getDamage() - defense, 0f);
         }
 
         health = health - damage - action.getTrueDamage();
-        if (health > initialHealth)
-        {
+        if (health > initialHealth) {
             health = initialHealth;
-        }
-        else if (health < 0)
-        {
+        } else if (health < 0) {
             health = 0;
         }
     }
@@ -79,8 +69,7 @@ public class CharacterState implements Cloneable{
             clone.defense = defense;
             clone.strength = strength;
             clone.activeEffects = new HashSet<>();
-            for (StatusEffect effect : activeEffects)
-            {
+            for (StatusEffect effect : activeEffects) {
                 clone.activeEffects.add(effect.clone());
             }
             return clone;

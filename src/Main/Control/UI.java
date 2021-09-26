@@ -6,7 +6,6 @@ import Main.Engine.Instance;
 import Main.Engine.Drawing.Renderer;
 import Main.Engine.TimeDependent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 
 import java.time.Duration;
 import java.util.List;
@@ -16,10 +15,12 @@ public class UI implements Drawable, TimeDependent {
     List<Option> options;
     Instance instance;
     UIState state;
-    Runnable stateChange = () -> {};
+    Runnable stateChange = () -> {
+    };
 
     @Override
     public void update(Duration dt) {
+        state.update(dt);
         stateChange.run();
         stateChange = () -> {};
     }
@@ -30,8 +31,7 @@ public class UI implements Drawable, TimeDependent {
         }
     }
 
-    public UI(Instance instance, Scene scene)
-    {
+    public UI(Instance instance, Scene scene) {
         this.instance = instance;
 
         state = new EmptyUI();
@@ -46,19 +46,15 @@ public class UI implements Drawable, TimeDependent {
         });
     }
 
-    public interface UIListener
-    {
-        void notify(Option option);
-    }
-
-    public interface UIState extends Drawable
-    {
+    private interface UIState extends Drawable, TimeDependent {
         void select();
+
         void cycleChoices(int howMuch);
+
         void goBack();
     }
 
-    public class EmptyUI implements UIState {
+    public static class EmptyUI implements UIState {
 
         @Override
         public void select() {
@@ -78,11 +74,15 @@ public class UI implements Drawable, TimeDependent {
         public void accept(Renderer renderer) {
 
         }
+
+        @Override
+        public void update(Duration dt) {
+
+        }
     }
 
-    public class SelectOption implements UIState
-    {
-        private List<Option> options;
+    public class SelectOption implements UIState{
+        private final List<Option> options;
         private int highlightedOptionIndex;
         private final UIState previousState;
 
@@ -94,18 +94,15 @@ public class UI implements Drawable, TimeDependent {
             highlightedOptionIndex = 0;
         }
 
-        public double getHeight()
-        {
+        public double getHeight() {
             return 200D;
         }
 
-        public List<Option> getOptions()
-        {
+        public List<Option> getOptions() {
             return options;
         }
 
-        public Option getHighlightedOption()
-        {
+        public Option getHighlightedOption() {
             return options.get(highlightedOptionIndex);
         }
 
@@ -128,33 +125,34 @@ public class UI implements Drawable, TimeDependent {
         public void goBack() {
             state = previousState;
         }
+
+        @Override
+        public void update(Duration dt) {
+
+        }
     }
 
-    public class SelectActor implements UIState
-    {
-        private List<Actor> actors;
+    public class SelectActor implements UIState {
+        private final List<Actor> actors;
         private int highlightedActorIndex = 0;
-        private Consumer<Actor> listener;
-        private UIState previousState;
+        private final Consumer<Actor> listener;
+        private final UIState previousState;
 
-        private SelectActor(Class<?> type, Consumer<Actor> listener, UIState previousState) throws NoChoicesException
-        {
+        private SelectActor(Class<?> type, Consumer<Actor> listener, UIState previousState) throws NoChoicesException {
             actors = instance.getActorsOfType(type);
             if (actors.isEmpty()) throw new NoChoicesException("No actors to select from");
             this.listener = listener;
             this.previousState = previousState;
         }
 
-        public SelectActor() throws NoChoicesException
-        {
+        public SelectActor() throws NoChoicesException {
             actors = instance.getActorsOfType(Controllable.class);
             if (actors.isEmpty()) throw new NoChoicesException("No actors to select from");
-            this.listener = actor -> state = new SelectOption(((Controllable)actor).getPrimaryOptions(), this);
+            this.listener = actor -> state = new SelectOption(((Controllable) actor).getPrimaryOptions(), this);
             this.previousState = null;
         }
 
-        public void goBack()
-        {
+        public void goBack() {
             if (previousState != null) state = previousState;
         }
 
@@ -175,12 +173,15 @@ public class UI implements Drawable, TimeDependent {
         @Override
         public void cycleChoices(int howMuch) {
             highlightedActorIndex = (highlightedActorIndex + 1) % actors.size();
-            System.out.println(highlightedActorIndex);
+        }
+
+        @Override
+        public void update(Duration dt) {
+            if (actors.get(highlightedActorIndex).isRemoved()) cycleChoices(1);
         }
     }
 
-    public void setSelectActorState(Class<?> type, Consumer<Actor> listener)
-    {
+    public void setSelectActorState(Class<?> type, Consumer<Actor> listener) {
         stateChange = () ->
         {
             try {
@@ -191,8 +192,7 @@ public class UI implements Drawable, TimeDependent {
         };
     }
 
-    public void setDefaultState()
-    {
+    public void setDefaultState() {
         stateChange = () ->
         {
             try {
@@ -203,8 +203,7 @@ public class UI implements Drawable, TimeDependent {
         };
     }
 
-    public void setSelectOptionState(List<Option> options)
-    {
+    public void setSelectOptionState(List<Option> options) {
         stateChange = () -> state = new SelectOption(options, state);
     }
 

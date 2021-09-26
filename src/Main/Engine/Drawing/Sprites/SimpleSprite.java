@@ -3,23 +3,23 @@ package Main.Engine.Drawing.Sprites;
 import Main.Logic.Components.Position;
 import javafx.scene.image.Image;
 
-public class SimpleSprite implements Sprite {
+import java.time.Duration;
+
+public class SimpleSprite implements TimeDependentSprite {
 
     private final Image image;
     private final int z;
-    private Position position;
-    private double scale;
+    private final Position position;
+    private final double scale;
 
-    public SimpleSprite(Image image, Position position, int z, double scale)
-    {
+    public SimpleSprite(Image image, Position position, int z, double scale) {
         this.image = image;
         this.position = position;
         this.z = z;
         this.scale = scale;
     }
 
-    public SimpleSprite(Image image, Position position, int z)
-    {
+    public SimpleSprite(Image image, Position position, int z) {
         this(image, position, z, 1D);
     }
 
@@ -29,8 +29,7 @@ public class SimpleSprite implements Sprite {
     }
 
     @Override
-    public Position getPosition()
-    {
+    public Position getPosition() {
         return position;
     }
 
@@ -52,5 +51,10 @@ public class SimpleSprite implements Sprite {
     @Override
     public SimpleSprite clone() {
         return new SimpleSprite(image, position.clone(), z, scale);
+    }
+
+    @Override
+    public void update(Duration dt) {
+
     }
 }

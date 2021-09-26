@@ -11,8 +11,7 @@ public class AttackMethod implements Cloneable {
     String name;
     List<StatusEffect> effects;
 
-    public AttackMethod(float damage, float trueDamage, List<StatusEffect> effects, double energy, String name)
-    {
+    public AttackMethod(float damage, float trueDamage, List<StatusEffect> effects, double energy, String name) {
         this.damage = damage;
         this.trueDamage = trueDamage;
         this.effects = effects;
@@ -20,28 +19,23 @@ public class AttackMethod implements Cloneable {
         this.energy = energy;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public float getDamage()
-    {
+    public float getDamage() {
         return damage;
     }
 
-    public float getTrueDamage()
-    {
+    public float getTrueDamage() {
         return trueDamage;
     }
 
-    public List<StatusEffect> getEffects()
-    {
+    public List<StatusEffect> getEffects() {
         return effects;
     }
 
-    public double getEnergy()
-    {
+    public double getEnergy() {
         return energy;
     }
 

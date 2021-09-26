@@ -3,13 +3,13 @@ package Main.Engine;
 import Main.Control.UI;
 import Main.Engine.Drawing.JFXRenderer;
 import Main.Engine.Drawing.Renderer;
-import Main.Engine.Drawing.Sprites.SimpleSprite;
-import Main.Engine.Drawing.Sprites.Sprite;
-import Main.Logic.Characters.PlayerCharacterBuilder;
+import Main.Engine.Drawing.Sprites.AnimatedSprite;
+import Main.Logic.Characters.Builders.EnemyCharacterBuilder;
+import Main.Logic.Characters.Builders.GenericCharacterDirector;
+import Main.Logic.Characters.Builders.PlayerCharacterBuilder;
 import Main.Logic.Components.AttackMethod;
 import Main.Logic.Components.CharacterState;
 import Main.Logic.Components.Position;
-import Main.Logic.StatusEffects.StatusEffect;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -17,6 +17,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
 import java.time.Duration;
 
 import java.util.*;
@@ -30,7 +31,7 @@ public class Instance extends javafx.application.Application {
     Queue<Actor> actorsToRemove = new LinkedList<>();
 
     @Override
-    public void start(Stage stage){
+    public void start(Stage stage) {
         stage.setTitle("FFEncounter");
         stage.setResizable(false);
 
@@ -39,7 +40,7 @@ public class Instance extends javafx.application.Application {
         Scene theScene = new Scene(root, 800, 800);
         stage.setScene(theScene);
 
-        Canvas canvas = new Canvas( 800, 800 );
+        Canvas canvas = new Canvas(800, 800);
         root.getChildren().add(canvas);
 
         gc = canvas.getGraphicsContext2D();
@@ -48,49 +49,46 @@ public class Instance extends javafx.application.Application {
         bg = new Background(new Image(String.valueOf(getClass().getResource("/BG.png"))));
         ui = new UI(this, theScene);
 
+        GenericCharacterDirector director = new GenericCharacterDirector();
+        PlayerCharacterBuilder playerBuilder = new PlayerCharacterBuilder(ui, this);
 
-        PlayerCharacterBuilder builder = new PlayerCharacterBuilder(ui, this);
-        builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
-                new Position(100, 100), 10, 1.5));
-        builder.setAttackMethods(List.of(new AttackMethod(25, 1,
-                new ArrayList<>(), 50, "Sword")));
-        builder.setState(new CharacterState(100F, 2F, 1F));
+        director.constructAtPosition(playerBuilder, new Position(100, 100));
+        instantiate(playerBuilder.getResult());
 
-        instantiate(builder.getResult());
+        director.constructAtPosition(playerBuilder, new Position(400, 100));
+        instantiate(playerBuilder.getResult());
 
-        builder.setSprite(new SimpleSprite(new Image(String.valueOf(getClass().getResource("/Warrior.png"))),
-                new Position(200, 100), 10, 1.5));
-        instantiate(builder.getResult());
+        EnemyCharacterBuilder enemyBuilder = new EnemyCharacterBuilder(this);
+        director.constructAtPosition(enemyBuilder, new Position(300, 300));
+
+        instantiate(enemyBuilder.getResult());
 
         ui.setDefaultState();
 
         loop();
     }
 
-    public void loop()
-    {
-        new AnimationTimer()
-        {
+    public void loop() {
+        new AnimationTimer() {
             long previousFrame = System.nanoTime();
 
-            @Override public void handle(long currentNanoTime)
-            {
+            @Override
+            public void handle(long currentNanoTime) {
                 Duration dt = Duration.ofNanos(currentNanoTime - previousFrame);
                 previousFrame = currentNanoTime;
                 Iterator<Actor> actorIterator = activeActors.iterator();
-                while (actorIterator.hasNext())
-                {
+                while (actorIterator.hasNext()) {
                     Actor actor = actorIterator.next();
                     actor.update(dt);
                 }
                 activeActors.removeAll(actorsToRemove);
+                actorsToRemove.clear();
 
                 ui.update(dt);
 
                 Renderer renderer = new JFXRenderer(gc);
                 bg.accept(renderer);
-                for (Actor actor : activeActors)
-                {
+                for (Actor actor : activeActors) {
                     actor.accept(renderer);
                 }
                 ui.accept(renderer);
@@ -99,33 +97,27 @@ public class Instance extends javafx.application.Application {
         }.start();
     }
 
-    public List<Actor> getActorsOfType(Class<?> type)
-    {
+    public List<Actor> getActorsOfType(Class<?> type) {
         List<Actor> result = new ArrayList<>();
-        for (Actor actor : activeActors)
-        {
+        for (Actor actor : activeActors) {
             if (type.isInstance(actor)) result.add(actor);
         }
         return result;
     }
 
-    public boolean isNoActiveActors()
-    {
+    public boolean isNoActiveActors() {
         return activeActors.isEmpty();
     }
 
-    public void instantiate(Actor actor)
-    {
+    public void instantiate(Actor actor) {
         activeActors.add(actor);
     }
 
-    public void remove(Actor actor)
-    {
+    public void remove(Actor actor) {
         actorsToRemove.add(actor);
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         launch(args);
     }
 }

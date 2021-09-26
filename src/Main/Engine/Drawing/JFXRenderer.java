@@ -18,38 +18,33 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class JFXRenderer implements Renderer{
+public class JFXRenderer implements Renderer {
     private final List<Sprite> toRender;
     private final GraphicsContext context;
     Runnable drawUI;
-    List<Runnable> lifeBars = new ArrayList<>();
+    List<Runnable> bars = new ArrayList<>();
 
     private static final Comparator<Sprite> zIndexOrdering = Comparator.comparingInt(Sprite::getZ);
 
-    public JFXRenderer(GraphicsContext gc)
-    {
+    public JFXRenderer(GraphicsContext gc) {
         context = gc;
         toRender = new LinkedList<>();
     }
 
     @Override
-    public void draw(Background bg)
-    {
-        context.drawImage(bg.getImage(), 0,0, context.getCanvas().getWidth(), context.getCanvas().getHeight());
+    public void draw(Background bg) {
+        context.drawImage(bg.getImage(), 0, 0, context.getCanvas().getWidth(), context.getCanvas().getHeight());
     }
 
-    public void renderAll()
-    {
+    public void renderAll() {
         toRender.sort(zIndexOrdering);
-        for (Sprite sprite : toRender)
-        {
+        for (Sprite sprite : toRender) {
             context.drawImage(sprite.getImage(),
                     sprite.getPosition().getX(), sprite.getPosition().getY(),
                     sprite.getWidth(), sprite.getHeight());
         }
         if (drawUI != null) drawUI.run();
-        for (Runnable drawLifeBar : lifeBars)
-        {
+        for (Runnable drawLifeBar : bars) {
             drawLifeBar.run();
         }
     }
@@ -74,7 +69,7 @@ public class JFXRenderer implements Renderer{
                 double fontSize = context.getFont().getSize();
                 double interspace = context.getFont().getSize() / 10;
                 context.fillText(options.get(i).getName(), canvasWidth / 2,
-                        canvasHeight - boxHeight / 2 + (interspace + fontSize) * (i - (float)options.size() / 2));
+                        canvasHeight - boxHeight / 2 + (interspace + fontSize) * (i - (float) options.size() / 2));
             }
         };
     }
@@ -95,14 +90,24 @@ public class JFXRenderer implements Renderer{
     @Override
     public void draw(GameCharacter character) {
         toRender.add(character.getSprite());
-        lifeBars.add(() -> {
-                    context.setFill(Color.DARKSLATEGRAY);
-                    context.fillRect(character.getSprite().getPosition().getX() - 20,
-                            character.getSprite().getPosition().getY() - 4, 40, 8);
-                    context.setFill(Color.GREEN);
-                    context.fillRect(character.getSprite().getPosition().getX() - 20,
-                            character.getSprite().getPosition().getY() - 4,
-                            (character.getCharacterState().getHealth() / character.getCharacterState().getInitialHealth()) * 40, 8);
-                });
+        bars.add(() -> {
+            //life bars
+            context.setFill(Color.DARKSLATEGRAY);
+            context.fillRect(character.getSprite().getPosition().getX() - 20,
+                    character.getSprite().getPosition().getY() - 16, 40, 8);
+            context.setFill(Color.GREEN);
+            context.fillRect(character.getSprite().getPosition().getX() - 20,
+                    character.getSprite().getPosition().getY() - 16,
+                    (character.getCharacterState().getHealth() / character.getCharacterState().getInitialHealth()) * 40, 8);
+
+            //energy bars
+            context.setFill(Color.DARKGOLDENROD);
+            context.fillRect(character.getSprite().getPosition().getX() - 20,
+                    character.getSprite().getPosition().getY() - 4, 40, 8);
+            context.setFill(Color.GREENYELLOW);
+            context.fillRect(character.getSprite().getPosition().getX() - 20,
+                    character.getSprite().getPosition().getY() - 4,
+                    (character.getEnergy() / character.getMaxEnergy()) * 40, 8);
+        });
     }
 }

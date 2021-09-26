@@ -7,8 +7,7 @@ import javafx.scene.image.Image;
 public class Background implements Drawable {
     private final Image bgImage;
 
-    public Background(Image image)
-    {
+    public Background(Image image) {
         this.bgImage = image;
     }
 

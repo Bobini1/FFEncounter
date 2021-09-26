@@ -1,12 +1,10 @@
 package Main.Logic.Components;
 
-public class Position implements Cloneable
-{
-    private double x;
-    private double y;
+public class Position implements Cloneable {
+    private final double x;
+    private final double y;
 
-    public Position(double x, double y)
-    {
+    public Position(double x, double y) {
         this.x = x;
         this.y = y;
     }
@@ -20,8 +18,7 @@ public class Position implements Cloneable
     }
 
     @Override
-    public Position clone()
-    {
+    public Position clone() {
         return new Position(x, y);
     }
 }
